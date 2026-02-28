@@ -12,7 +12,7 @@ class WelcomeScreen extends StatelessWidget {
           // Top image (half screen)
           ClipRRect(
             borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(40),
+              bottomLeft: Radius.circular(30),
               bottomRight: Radius.circular(40),
             ),
             child: SizedBox(
