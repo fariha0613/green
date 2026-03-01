@@ -40,7 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
         "home":(context)=>homepage(),
         "itemPage":(context)=>Itempage(),
         "cartPage":(context)=>CartPage(),
-        "account":(context)=>ProfileScreen(),
+        "account":(context)=> ProfileScreen(),
       },
     );
   }
