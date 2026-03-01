@@ -54,6 +54,8 @@ class  CartPage extends StatefulWidget{
                ],
              ),
          ),
+
+
          Container(
            padding: EdgeInsets.only(top:10),
            color:Colors.white,
