@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:green/hpCategory.dart';
-//okok
+
 //Hello sadia
 //main home page ta
 class homepage extends StatelessWidget{
@@ -30,8 +30,8 @@ class homepage extends StatelessWidget{
 
         //searchbar
          Container(
-           padding:const EdgeInsets.symmetric(horizontal: 15),
-           margin: const EdgeInsets.symmetric(horizontal: 20),
+           padding: EdgeInsets.symmetric(horizontal: 15),
+           margin:  EdgeInsets.symmetric(horizontal: 20),
            decoration: BoxDecoration(
              color:Colors.white,
              boxShadow: [BoxShadow(
@@ -72,10 +72,11 @@ class homepage extends StatelessWidget{
          ],
          ),
          ),
-
-
        ],
       ),
+
+
+
        bottomNavigationBar: Container(
          height: 80,
          padding: EdgeInsets.symmetric(horizontal: 25,vertical: 12),
@@ -84,8 +85,8 @@ class homepage extends StatelessWidget{
            mainAxisAlignment: MainAxisAlignment.spaceBetween,
            children: [
              Expanded(
-               child: Column(
-                 children: [
+                  child:Column(
+                  children: [
                    Icon(
                      Icons.home,
                      color: Colors.green,
@@ -129,7 +130,6 @@ class homepage extends StatelessWidget{
            Expanded(
             child: GestureDetector(
             onTap: (){
-
               Navigator.pushNamed(context, "account");
              },
              child:Column(

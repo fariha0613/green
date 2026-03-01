@@ -9,7 +9,7 @@ class Itempage extends StatelessWidget{
       body:ListView(
         children: [
           Container(
-            color:Colors.green[300],
+            color:Colors.white,
             width: double.infinity,
             height:320,
             padding: EdgeInsets.symmetric(vertical: 15),
@@ -29,7 +29,7 @@ class Itempage extends StatelessWidget{
                         size:28,
                       )
                     ),
-                    Container(
+                    Container( //r8 side a star
                       padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color:Colors.white,
@@ -44,16 +44,17 @@ class Itempage extends StatelessWidget{
                         Icons.star,
                         size:30,
                         color:Colors.green[300],
-                      )
-                    )
+                      ),
+                    ),
                   ],
                 ),
                 ),
-                Image.asset("assets/images/pic8.png",height: 200,width:280,fit:BoxFit.fitWidth),
-
+                Image.asset("assets/images/pic8.png",height: 200,width:280,fit:BoxFit.contain),
               ],
             ),
           ),
+
+
           SizedBox(height: 15,),
           Container(
             padding: EdgeInsets.all(15),
@@ -76,15 +77,13 @@ class Itempage extends StatelessWidget{
                   style:TextStyle(
                       fontSize: 20,fontWeight: FontWeight.bold),
                 ),
-                Column(
-                  children:[
-                    Text("\$50",
+                Text("\$50",
                       style:TextStyle(fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color:Colors.green),
                     ),
-                  ],
-                ),
+
+
               ],
             ),
           ),
