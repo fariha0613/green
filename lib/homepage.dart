@@ -4,10 +4,6 @@ import 'package:green/hpCategory.dart';
 import 'choose.dart';
 import 'SearchPage.dart';
 
-//okok
-//Hello sadia0
-//main home page ta
-
 class homepage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -33,7 +29,6 @@ class homepage extends StatelessWidget {
 
             SizedBox(height: 10),
 
-            // SEARCH BAR
             Container(
               padding: EdgeInsets.symmetric(horizontal: 15),
               margin: EdgeInsets.symmetric(horizontal: 20),
@@ -95,7 +90,6 @@ class homepage extends StatelessWidget {
           ],
         ),
 
-        // BOTTOM NAVIGATION
         bottomNavigationBar: Container(
           height: 80,
           padding: EdgeInsets.symmetric(horizontal: 25, vertical: 12),
