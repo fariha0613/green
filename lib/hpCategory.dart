@@ -10,7 +10,6 @@ class hpCategory extends StatelessWidget{
     return  Padding(
         padding:  EdgeInsets.all(12),
         child: GridView.builder(
-            //primary: false,
             itemCount: 6,
             gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
