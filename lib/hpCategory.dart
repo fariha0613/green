@@ -14,7 +14,7 @@ class hpCategory extends StatelessWidget{
             itemCount: 6,
             gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 1.7,
+              childAspectRatio: 0.45,
               crossAxisSpacing: 15,
               mainAxisSpacing: 15,
             ),
@@ -40,7 +40,7 @@ class hpCategory extends StatelessWidget{
                 child: Column(
                   children: [
                        Image.asset("assets/images/pic$i.png",
-                        fit: BoxFit.cover,
+                        fit: BoxFit.contain,
                         height: 200,
                         width: 200,
                       ),

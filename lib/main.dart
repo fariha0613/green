@@ -6,6 +6,7 @@ import 'CartPage.dart';
 import 'ItemPage.dart';
 import 'LoginScreen.dart' show LoginScreen;
 import 'ProfileScreen.dart';
+import 'SearchPage.dart';
 import 'SignUp.dart' show SignupScreen;
 import 'WelcomeScreen.dart';
 import 'homepage.dart';
@@ -41,6 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
         "itemPage":(context)=>Itempage(),
         "cartPage":(context)=>CartPage(),
         "account":(context)=> ProfileScreen(),
+        "search":(context)=>SearchPage(),
       },
     );
   }

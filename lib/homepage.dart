@@ -101,26 +101,11 @@ class homepage extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    Icon(Icons.home, color: Colors.green, size: 32),
+                    Icon(Icons.home, color: Colors.green, size: 30),
                     Text(
                       "Home",
                       style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ),
-
-              Expanded(
-                child: Column(
-                  children: [
-                    Icon(Icons.search, color: Colors.green, size: 32),
-                    Text(
-                      "Explore",
-                      style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           color: Colors.green,
                           fontWeight: FontWeight.bold),
                     ),
@@ -131,16 +116,36 @@ class homepage extends StatelessWidget {
               Expanded(
                 child: GestureDetector(
                   onTap: () {
+                    Navigator.pushNamed(context, "search");
+                  },
+                child: Column(
+                  children: [
+                    Icon(Icons.search, color: Colors.green, size: 30),
+                    Text(
+                      "Explore",
+                      style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+              ),
+
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
                     Navigator.pushNamed(context, "cartPage");
                   },
                   child: Column(
                     children: [
                       Icon(CupertinoIcons.cart,
-                          color: Colors.green, size: 32),
+                          color: Colors.green, size: 30),
                       Text(
                         "My Cart",
                         style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 14,
                             color: Colors.green,
                             fontWeight: FontWeight.bold),
                       ),
@@ -157,11 +162,11 @@ class homepage extends StatelessWidget {
                   child: Column(
                     children: [
                       Icon(Icons.person,
-                          color: Colors.green, size: 32),
+                          color: Colors.green, size: 30),
                       Text(
                         "Account",
                         style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 14,
                             color: Colors.green,
                             fontWeight: FontWeight.bold),
                       ),
@@ -182,11 +187,11 @@ class homepage extends StatelessWidget {
                   child: Column(
                     children: [
                       Icon(Icons.swap_horiz,
-                          color: Colors.green, size: 32),
+                          color: Colors.green, size: 30),
                       Text(
                         "Switch",
                         style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 14,
                             color: Colors.green,
                             fontWeight: FontWeight.bold),
                       ),
