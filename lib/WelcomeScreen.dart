@@ -9,7 +9,7 @@ class WelcomeScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Top image (half screen)
+
           ClipRRect(
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(30),
@@ -25,7 +25,7 @@ class WelcomeScreen extends StatelessWidget {
             ),
           ),
 
-          // a little dark layer so text looks clear
+
           Container(
             height: MediaQuery.of(context).size.height * 0.60,
             decoration: BoxDecoration(
