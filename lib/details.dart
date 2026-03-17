@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
 import 'homepage.dart';
 
 class DetailsPage extends StatefulWidget {
@@ -12,37 +14,70 @@ class _DetailsPageState extends State<DetailsPage> {
   final TextEditingController priceController = TextEditingController();
 
   bool isDonate = false;
+  bool isLoading = false;
+
+  Future<bool> uploadData() async {
+    if (nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please enter a product name")),
+      );
+      return false;
+    }
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('products')
+          .add({
+        'name': nameController.text.trim(),
+        'description': descriptionController.text.trim(),
+        'price': isDonate ? 0 : int.tryParse(priceController.text) ?? 0,
+        'isDonate': isDonate,
+        'createdAt': FieldValue.serverTimestamp(),
+      })
+          .timeout(Duration(seconds: 10));
+
+      return true;
+    }  catch (e) {
+      if (mounted) {
+      }
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.green, // Green background
-        title: Text(
-          "Product Details",
-          style: TextStyle(color: Colors.white), // White text
-        ),
+        backgroundColor: Colors.green,
+        title: Text("Products Details", style: TextStyle(color: Colors.white)),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white), // White back button
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          TextButton(
-            onPressed: () {
-              // After confirm → Go to Homepage
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => homepage()),
-                    (route) => false,
-              );
-            },
-            child: Text(
-              "Confirm",
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
+          isLoading
+              ? Padding(
+            padding: EdgeInsets.all(12),
+            child: CircularProgressIndicator(color: Colors.white),
           )
+              : TextButton(
+            onPressed: () async {
+              setState(() => isLoading = true);
+
+              final success = await uploadData();
+
+              setState(() => isLoading = false);
+
+              if (success && mounted) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => homepage()),
+                      (route) => false,
+                );
+              }
+            },
+            child: Text("Confirm", style: TextStyle(color: Colors.white, fontSize: 16)),
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -51,10 +86,10 @@ class _DetailsPageState extends State<DetailsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            // Upload Picture
+            // Image upload
             GestureDetector(
               onTap: () {
-                // Image upload logic will be added later
+                // Image upload later
               },
               child: Container(
                 height: 150,
@@ -64,10 +99,7 @@ class _DetailsPageState extends State<DetailsPage> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
-                  child: Text(
-                    "+ Upload Picture",
-                    style: TextStyle(fontSize: 18),
-                  ),
+                  child: Text("+ Upload Picture", style: TextStyle(fontSize: 18)),
                 ),
               ),
             ),
@@ -129,6 +161,7 @@ class _DetailsPageState extends State<DetailsPage> {
                 Text("Donate (Price will be 0)")
               ],
             ),
+
           ],
         ),
       ),
