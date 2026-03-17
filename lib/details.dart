@@ -39,6 +39,7 @@ class _DetailsPageState extends State<DetailsPage> {
       return true;
     }  catch (e) {
       if (mounted) {
+
       }
       return false;
     }
