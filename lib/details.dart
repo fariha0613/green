@@ -16,6 +16,10 @@ class _DetailsPageState extends State<DetailsPage> {
   bool isDonate = false;
   bool isLoading = false;
 
+  String?selectedCategory=null;
+
+
+
   Future<bool> uploadData() async {
     if (nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -107,6 +111,28 @@ class _DetailsPageState extends State<DetailsPage> {
 
             SizedBox(height: 30),
 
+            Container(
+              padding:EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                border:Border.all(color:Colors.grey),
+                borderRadius:BorderRadius.circular(8),
+              ),
+              child:DropdownButton<String>(
+                 value:selectedCategory,hint: Text("Select Category",style:TextStyle(color:Colors.black,)),
+                 isExpanded: true,
+                underline: SizedBox(),
+                items:["Clothes","Electronics","Furniture",'Others'].map((category)=>
+                DropdownMenuItem<String>(value:category,child: Text(category),
+                )).toList(),
+                onChanged: (value){
+                   setState(() {
+                     selectedCategory=value;
+                   });
+                },
+              ),
+            ),
+
+            SizedBox(height: 30),
             // Product Name
             TextField(
               controller: nameController,
