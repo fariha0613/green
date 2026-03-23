@@ -60,6 +60,7 @@ class ProductService {
   }
 
   // Fetch all products as a stream
+
   Stream<List<Product>> getProducts() {
     return _productCollection
         .orderBy('createdAt', descending: true)

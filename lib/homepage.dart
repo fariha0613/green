@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:green/models/productModel.dart'; // Updated import
+import 'package:green/hpCategory.dart';
+import 'package:green/models/productModel.dart';
 import 'choose.dart';
 import 'SearchPage.dart';
 
@@ -15,7 +16,6 @@ class homepage extends StatelessWidget {
         body: Column(
           children: [
 
-            // Top PageView slider
             SizedBox(
               height: 300,
               child: PageView.builder(
@@ -32,7 +32,6 @@ class homepage extends StatelessWidget {
 
             SizedBox(height: 10),
 
-            // Search box
             Container(
               padding: EdgeInsets.symmetric(horizontal: 15),
               margin: EdgeInsets.symmetric(horizontal: 20),
@@ -67,7 +66,6 @@ class homepage extends StatelessWidget {
 
             SizedBox(height: 10),
 
-            // TabBar
             TabBar(
               labelColor: Colors.green,
               unselectedLabelColor: Colors.black,
@@ -80,22 +78,36 @@ class homepage extends StatelessWidget {
               ],
             ),
 
-            // TabBarView with Firestore products
             Expanded(
-              child: TabBarView(
-                children: [
-                  buildProductList("Furniture"),
-                  buildProductList("Cloths"),
-                  buildProductList("Electronics"),
-                  buildProductList("Others"),
-                ],
+              child: StreamBuilder<List<Product>>(
+                stream: _productService.getProducts(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator(color: Colors.green));
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text("No products found"));
+                  }
+
+                  final allProducts = snapshot.data!;
+
+                  final categories = ["Furniture", "Cloths", "Electronics", "Others"];
+
+                  return TabBarView(
+                    children: categories.map((cat) {
+                      final filtered = allProducts
+                          .where((p) => p.category.toLowerCase() == cat.toLowerCase())
+                          .toList();
+                      return hpCategory(products: filtered);
+                    }).toList(),
+                  );
+                },
               ),
             ),
 
           ],
         ),
 
-        // Bottom Navigation Bar
         bottomNavigationBar: Container(
           height: 80,
           padding: EdgeInsets.symmetric(horizontal: 25, vertical: 12),
@@ -104,100 +116,108 @@ class homepage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
 
-              buildNavItem(Icons.home, "Home", Colors.green, () {}),
+              Expanded(
+                child: Column(
+                  children: [
+                    Icon(Icons.home, color: Colors.green, size: 30),
+                    Text(
+                      "Home",
+                      style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
 
-              buildNavItem(Icons.search, "Explore", Colors.green, () {
-                Navigator.pushNamed(context, "search");
-              }),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, "search");
+                  },
+                  child: Column(
+                    children: [
+                      Icon(Icons.search, color: Colors.green, size: 30),
+                      Text(
+                        "Explore",
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
 
-              buildNavItem(CupertinoIcons.cart, "My Cart", Colors.green, () {
-                Navigator.pushNamed(context, "cartPage");
-              }),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, "cartPage");
+                  },
+                  child: Column(
+                    children: [
+                      Icon(CupertinoIcons.cart, color: Colors.green, size: 30),
+                      Text(
+                        "My Cart",
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
 
-              buildNavItem(Icons.person, "Account", Colors.green, () {
-                Navigator.pushNamed(context, "account");
-              }),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, "account");
+                  },
+                  child: Column(
+                    children: [
+                      Icon(Icons.person, color: Colors.green, size: 30),
+                      Text(
+                        "Account",
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
 
-              buildNavItem(Icons.swap_horiz, "Switch", Colors.green, () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => ChoosePage()),
-                );
-              }),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => ChoosePage()),
+                    );
+                  },
+                  child: Column(
+                    children: [
+                      Icon(Icons.swap_horiz, color: Colors.green, size: 30),
+                      Text(
+                        "Switch",
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
 
             ],
           ),
         ),
       ),
-    );
-  }
-
-  // Widget to build a navigation item
-  Widget buildNavItem(IconData icon, String label, Color color, VoidCallback onTap) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 30),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Widget to build products list filtered by category
-  Widget buildProductList(String category) {
-    return StreamBuilder<List<Product>>(
-      stream: _productService.getProducts(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text("No products found"));
-        }
-
-        // Filter products by category
-        final products = snapshot.data!
-            .where((product) => product.category == category)
-            .toList();
-
-        if (products.isEmpty) {
-          return Center(child: Text("No products in $category"));
-        }
-
-        return ListView.builder(
-          itemCount: products.length,
-          itemBuilder: (context, index) {
-            final product = products[index];
-            return Card(
-              margin: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-              child: ListTile(
-                leading: Image.network(
-                  product.imageUrl,
-                  width: 60,
-                  fit: BoxFit.cover,
-                ),
-                title: Text(product.name),
-                subtitle: Text(product.description),
-                trailing: Text(
-                  product.isDonate ? "Free" : "\$${product.price.toStringAsFixed(2)}",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-            );
-          },
-        );
-      },
     );
   }
 }

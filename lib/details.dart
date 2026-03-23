@@ -131,7 +131,6 @@ class _DetailsPageState extends State<DetailsPage> {
   }
 
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,28 +175,25 @@ class _DetailsPageState extends State<DetailsPage> {
             GestureDetector(
               onTap: isImageUploading ? null : pickImage,
               child: Container(
-                height: 180,
                 width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 15),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: isImageUploading
-                    ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(color: Colors.green),
-                      SizedBox(height: 10),
-                      Text("Uploading image...",
-                          style: TextStyle(color: Colors.grey[600])),
-                    ],
-                  ),
-                )
-                    : Text ("image selected"),
+                child: Row(
+                  children: [
+                    Icon(Icons.image, color: Colors.grey),
+                    SizedBox(width: 10),
+                    Text(
+                      _pickedFile != null ? _pickedFile!.name : "Select Image",
+                      style: TextStyle(color: Colors.grey[700], fontSize: 16),
+                    ),
+                  ],
+                ),
               ),
             ),
+
 
             if (_pickedFile != null)
               Padding(

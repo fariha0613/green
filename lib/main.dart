@@ -1,11 +1,8 @@
-//hello....
-
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 import 'CartPage.dart';
-import 'ItemPage.dart';
 import 'LoginScreen.dart' show LoginScreen;
 import 'ProfileScreen.dart';
 import 'SearchPage.dart';
@@ -13,6 +10,8 @@ import 'SignUp.dart' show SignupScreen;
 import 'WelcomeScreen.dart';
 import 'homepage.dart';
 import 'splashScreen.dart';
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,10 +38,10 @@ class MyApp extends StatelessWidget {
         "login": (context) => LoginScreen(),
         "signup": (context) => SignupScreen(),
         "home": (context) => homepage(),
-        "itemPage": (context) => Itempage(),
         "cartPage": (context) => CartPage(),
         "account": (context) => ProfileScreen(),
         "search": (context) => SearchPage(),
+
       },
     );
   }
