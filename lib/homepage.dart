@@ -4,18 +4,19 @@ import 'package:green/hpCategory.dart';
 import 'package:green/models/productModel.dart';
 import 'choose.dart';
 import 'SearchPage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class homepage extends StatelessWidget {
   final ProductService _productService = ProductService();
 
   @override
   Widget build(BuildContext context) {
+    print("UID: ${FirebaseAuth.instance.currentUser?.uid}");
     return DefaultTabController(
       length: 4,
       child: Scaffold(
         body: Column(
           children: [
-
             SizedBox(
               height: 300,
               child: PageView.builder(
@@ -39,7 +40,7 @@ class homepage extends StatelessWidget {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
+                    color: Colors.grey.withValues(alpha: 0.3), // ✅ FIXED
                     spreadRadius: 1,
                     blurRadius: 5,
                   ),
@@ -134,13 +135,13 @@ class homepage extends StatelessWidget {
               Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, "search");
+                    Navigator.pushNamed(context, "favourite");
                   },
                   child: Column(
                     children: [
-                      Icon(Icons.search, color: Colors.green, size: 30),
+                      Icon(Icons.favorite, color: Colors.green, size: 30),
                       Text(
-                        "Explore",
+                        "Favourite",
                         style: TextStyle(
                             fontSize: 14,
                             color: Colors.green,

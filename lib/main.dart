@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-
+import 'favourite_page.dart';
 import 'CartPage.dart';
 import 'LoginScreen.dart' show LoginScreen;
 import 'ProfileScreen.dart';
-import 'SearchPage.dart';
+//import 'SearchPage.dart';
 import 'SignUp.dart' show SignupScreen;
 import 'WelcomeScreen.dart';
 import 'homepage.dart';
 import 'splashScreen.dart';
-
+//import 'package:firebase_auth/firebase_auth.dart';
 
 
 void main() async {
@@ -18,6 +18,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  //await FirebaseAuth.instance.signInAnonymously();
+
   runApp(const MyApp());
 }
 
@@ -40,7 +42,7 @@ class MyApp extends StatelessWidget {
         "home": (context) => homepage(),
         "cartPage": (context) => CartPage(),
         "account": (context) => ProfileScreen(),
-        "search": (context) => SearchPage(),
+        "favourite": (context) => FavouritePage(),
 
       },
     );
