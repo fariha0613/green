@@ -1,16 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:green/models/productModel.dart';
+import 'favourite_service.dart';
+import 'hpCategory.dart';
 
-// item tap korle jei pg ashbe
-class Itempage extends StatelessWidget {
+class ItemPage extends StatelessWidget {
   final Product product;
 
-  Itempage({required this.product});
+  ItemPage({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
-    // Fetch other products from same category for "Only For You" section
     final ProductService _productService = ProductService();
 
     return Scaffold(
@@ -29,33 +29,11 @@ class Itempage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       InkWell(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: Icon(
-                          Icons.arrow_back,
-                          size: 28,
-                        ),
+                        onTap: () => Navigator.pop(context),
+                        child: Icon(Icons.arrow_back, size: 28),
                       ),
-                      Container(
-                        padding: EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey,
-                              spreadRadius: 1,
-                              blurRadius: 5,
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.star,
-                          size: 30,
-                          color: Colors.green[300],
-                        ),
-                      ),
+                      FavouriteButton(
+                          product: product, favService: FavouriteService()),
                     ],
                   ),
                 ),
@@ -65,19 +43,15 @@ class Itempage extends StatelessWidget {
                     height: 200,
                     width: 280,
                     fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => Icon(
-                      Icons.image_not_supported,
-                      size: 100,
-                      color: Colors.grey,
-                    ),
+                    errorBuilder: (context, error, stackTrace) =>
+                        Icon(Icons.image_not_supported,
+                            size: 100, color: Colors.grey),
                   ),
                 ),
               ],
             ),
           ),
-
           SizedBox(height: 15),
-
           Container(
             padding: EdgeInsets.all(15),
             margin: EdgeInsets.symmetric(horizontal: 20),
@@ -85,20 +59,18 @@ class Itempage extends StatelessWidget {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 1,
-                  blurRadius: 5,
-                ),
+                    color: Colors.grey.withOpacity(0.3),
+                    spreadRadius: 1,
+                    blurRadius: 5),
               ],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(
-                    product.name,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
+                  child: Text(product.name,
+                      style:
+                      TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 ),
                 Text(
                   product.isDonate
@@ -112,9 +84,7 @@ class Itempage extends StatelessWidget {
               ],
             ),
           ),
-
           SizedBox(height: 15),
-
           Container(
             padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
             margin: EdgeInsets.symmetric(horizontal: 20),
@@ -122,40 +92,30 @@ class Itempage extends StatelessWidget {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 1,
-                  blurRadius: 5,
-                ),
+                    color: Colors.grey.withOpacity(0.3),
+                    spreadRadius: 1,
+                    blurRadius: 5),
               ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "Product Details",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
+                Text("Product Details",
+                    style:
+                    TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 SizedBox(height: 8),
-                Text(
-                  product.description,
-                  style: TextStyle(fontSize: 16),
-                ),
+                Text(product.description, style: TextStyle(fontSize: 16)),
               ],
             ),
           ),
-
           SizedBox(height: 15),
-
-          // "Only For You" - other products from same category
           StreamBuilder<List<Product>>(
             stream: _productService.getProducts(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return SizedBox();
 
               final related = snapshot.data!
-                  .where((p) =>
-              p.category == product.category && p.id != product.id)
+                  .where((p) => p.category == product.category && p.id != product.id)
                   .toList();
 
               if (related.isEmpty) return SizedBox();
@@ -165,11 +125,9 @@ class Itempage extends StatelessWidget {
                 children: [
                   Padding(
                     padding: EdgeInsets.only(left: 30),
-                    child: Text(
-                      "Only For You",
-                      style: TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
+                    child: Text("Only For You",
+                        style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   ),
                   SizedBox(height: 5),
                   SingleChildScrollView(
@@ -181,7 +139,7 @@ class Itempage extends StatelessWidget {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => Itempage(product: p),
+                                builder: (_) => ItemPage(product: p),
                               ),
                             );
                           },
@@ -189,25 +147,22 @@ class Itempage extends StatelessWidget {
                             height: 100,
                             width: 140,
                             padding: EdgeInsets.all(5),
-                            margin: EdgeInsets.only(
-                                top: 8, bottom: 8, left: 20),
+                            margin: EdgeInsets.only(top: 8, bottom: 8, left: 20),
                             decoration: BoxDecoration(
                               color: Colors.green[300],
                               borderRadius: BorderRadius.circular(10),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.grey.withOpacity(0.3),
-                                  spreadRadius: 1,
-                                  blurRadius: 8,
-                                ),
+                                    color: Colors.grey.withOpacity(0.3),
+                                    spreadRadius: 1,
+                                    blurRadius: 8),
                               ],
                             ),
                             child: Image.network(
                               p.imageUrl,
                               fit: BoxFit.contain,
                               errorBuilder: (context, error, stackTrace) =>
-                                  Icon(Icons.image_not_supported,
-                                      color: Colors.white),
+                                  Icon(Icons.image_not_supported, color: Colors.white),
                             ),
                           ),
                         );
@@ -220,20 +175,15 @@ class Itempage extends StatelessWidget {
           ),
         ],
       ),
-
       bottomNavigationBar: Container(
         height: 80,
         padding: EdgeInsets.symmetric(vertical: 12, horizontal: 25),
-        decoration: BoxDecoration(
-          color: Colors.white,
-        ),
+        decoration: BoxDecoration(color: Colors.white),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, "cartPage");
-              },
+              onTap: () => Navigator.pushNamed(context, "cartPage"),
               child: Container(
                 height: 60,
                 width: 80,

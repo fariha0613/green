@@ -99,7 +99,7 @@ class homepage extends StatelessWidget {
                       final filtered = allProducts
                           .where((p) => p.category.toLowerCase() == cat.toLowerCase())
                           .toList();
-                      return hpCategory(products: filtered);
+                      return HpCategory(products: filtered);
                     }).toList(),
                   );
                 },

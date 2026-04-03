@@ -33,7 +33,7 @@ class FavouritePage extends StatelessWidget {
           ),
           itemCount: favs.length,
           itemBuilder: (context, index) {
-          final data = favs[index];
+            final data = favs[index].data() as Map<String, dynamic>;
 
           return Card(
           child: Column(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-//hello,,
-
+import 'package:firebase_auth/firebase_auth.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -110,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 22),
 
-                  // ✅ FIXED SIGN IN BUTTON
+                  //SIGN IN BUTTON
                   SizedBox(
                     width: double.infinity,
                     height: 50,
@@ -121,9 +120,40 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,"home");
+                      onPressed: () async {
+                        String email = _email.text.trim();
+                        String password = _pass.text.trim();
+
+                        if (email.isEmpty || password.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Please enter email & password")),
+                          );
+                          return;
+                        }
+
+                        try {
+                          await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            email: email,
+                            password: password,
+                          );
+
+                          print("✅ LOGGED IN UID: ${FirebaseAuth.instance.currentUser?.uid}");
+
+                          Navigator.pushReplacementNamed(context, "home");
+
+                        } on FirebaseAuthException catch (e) {
+                          String message = "Login failed";
+
+                          if (e.code == 'user-not-found') {
+                            message = "No user found";
+                          } else if (e.code == 'wrong-password') {
+                            message = "Wrong password";
+                          }
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(message)),
+                          );
+                        }
                       },
                       child: const Text(
                         "Sign In",

@@ -3,10 +3,10 @@ import 'package:green/models/productModel.dart';
 import 'ItemPage.dart';
 import 'favourite_service.dart';
 
-class hpCategory extends StatelessWidget {
+class HpCategory extends StatelessWidget {
   final List<Product> products;
 
-  const hpCategory({super.key, required this.products});
+  const HpCategory({super.key, required this.products});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class hpCategory extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => Itempage(product: product)),
+              MaterialPageRoute(builder: (_) => ItemPage(product: product)),
             );
           },
           child: Container(
@@ -41,7 +41,7 @@ class hpCategory extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withValues(alpha: 0.3),
+                  color: Colors.grey.withOpacity(0.3),
                   spreadRadius: 1,
                   blurRadius: 5,
                 ),
@@ -54,14 +54,16 @@ class hpCategory extends StatelessWidget {
                   children: [
                     Expanded(
                       child: ClipRRect(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                        borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(10)),
                         child: Image.network(
                           product.imageUrl,
                           fit: BoxFit.cover,
                           width: double.infinity,
                           errorBuilder: (context, error, stackTrace) => Container(
                             color: Colors.green[100],
-                            child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                            child: const Icon(Icons.image_not_supported,
+                                color: Colors.grey),
                           ),
                         ),
                       ),
@@ -70,13 +72,15 @@ class hpCategory extends StatelessWidget {
                       padding: const EdgeInsets.all(8),
                       child: Text(
                         product.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 14),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       child: Text(
                         product.isDonate
                             ? "Free (Donate)"
@@ -90,42 +94,82 @@ class hpCategory extends StatelessWidget {
                     ),
                   ],
                 ),
-
-                // ❤️ Favourite Button
+                // Favourite Button
                 Positioned(
                   top: 5,
                   right: 5,
-                  child: StreamBuilder<bool>(
-                    stream: favService.isFavourite(product.id!), // FIXED HERE
-                    builder: (context, snapshot) {
-                      final isFav = snapshot.data ?? false;
-
-                      return IconButton(
-                        icon: Icon(
-                          isFav ? Icons.favorite : Icons.favorite_border,
-                          color: Colors.red,
-                        ),
-                        onPressed: () async {
-                          if (isFav) {
-                            await favService.removeFromFavourites(product.id!);
-                          } else {
-                            await favService.addToFavourites({
-                              'name': product.name,
-                              'image': product.imageUrl,
-                              'price': product.price,
-                              'category': product.category,
-                            }, product.id!);
-                          }
-                        },
-                      );
-                    },
-                  ),
+                  child:
+                  FavouriteButton(product: product, favService: favService),
                 ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+}
+
+// ================= Shared Favourite Button =================
+class FavouriteButton extends StatefulWidget {
+  final Product product;
+  final FavouriteService favService;
+
+  const FavouriteButton(
+      {super.key, required this.product, required this.favService});
+
+  @override
+  _FavouriteButtonState createState() => _FavouriteButtonState();
+}
+
+class _FavouriteButtonState extends State<FavouriteButton> {
+  bool isFav = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.favService.isFavourite(widget.product.id!).listen((value) {
+      if (mounted) {
+        setState(() {
+          isFav = value;
+        });
+      }
+    });
+  }
+
+  void toggleFavourite() async {
+    setState(() => isFav = !isFav); // instant UI feedback
+    if (isFav) {
+      await widget.favService.addToFavourites({
+        'name': widget.product.name,
+        'image': widget.product.imageUrl,
+        'price': widget.product.price,
+        'category': widget.product.category,
+      }, widget.product.id!);
+    } else {
+      await widget.favService.removeFromFavourites(widget.product.id!);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: toggleFavourite,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        height: 35,
+        width: 35,
+        decoration: BoxDecoration(
+          color: isFav ? Colors.green : Colors.white,
+          border: Border.all(color: Colors.green, width: 2),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          Icons.favorite,
+          color: isFav ? Colors.white : Colors.green,
+          size: 20,
+        ),
+      ),
     );
   }
 }
