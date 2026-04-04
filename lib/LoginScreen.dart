@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 class LoginScreen extends StatefulWidget {
-
   const LoginScreen({super.key});
 
   @override
@@ -15,6 +13,44 @@ class _LoginScreenState extends State<LoginScreen> {
   final _email = TextEditingController();
   final _pass = TextEditingController();
   bool _hidePass = true;
+
+  // 🔥 FORGOT PASSWORD FUNCTION (simple + debug)
+  Future<void> _forgotPassword() async {
+    String email = _email.text.trim();
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Enter your email first")),
+      );
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+      print("Reset email sent to: $email");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Reset link sent to email")),
+      );
+    } on FirebaseAuthException catch (e) {
+      print("Firebase error: ${e.code}");
+
+      String message = "Error";
+
+      if (e.code == 'user-not-found') {
+        message = "No user found";
+      } else if (e.code == 'invalid-email') {
+        message = "Invalid email";
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } catch (e) {
+      print("Other error: $e");
+    }
+  }
 
   @override
   void dispose() {
@@ -107,9 +143,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
+                  // 🔥 FORGOT PASSWORD BUTTON
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _forgotPassword,
+                      child: const Text(
+                        "Forgot Password?",
+                        style: TextStyle(color: Colors.green),
+                      ),
+                    ),
+                  ),
+
                   const SizedBox(height: 22),
 
-                  //SIGN IN BUTTON...
+                  // SIGN IN BUTTON
                   SizedBox(
                     width: double.infinity,
                     height: 50,
@@ -126,18 +174,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         if (email.isEmpty || password.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Please enter email & password")),
+                            const SnackBar(
+                                content: Text("Please enter email & password")),
                           );
                           return;
                         }
 
                         try {
-                          await FirebaseAuth.instance.signInWithEmailAndPassword(
+                          await FirebaseAuth.instance
+                              .signInWithEmailAndPassword(
                             email: email,
                             password: password,
                           );
 
-                          print("✅ LOGGED IN UID: ${FirebaseAuth.instance.currentUser?.uid}");
+                          print(
+                              "LOGGED IN UID: ${FirebaseAuth.instance.currentUser?.uid}");
 
                           Navigator.pushReplacementNamed(context, "home");
 
@@ -178,11 +229,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      onPressed: () {
-
-
-
-                      },
+                      onPressed: () {},
                       child: const Text(
                         "Continue with Google",
                         style: TextStyle(color: Colors.black87),
@@ -201,8 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const Text("Don’t have an account? "),
                 GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(
-                        context,"signup");
+                    Navigator.pushNamed(context, "signup");
                   },
                   child: const Text(
                     "Sign Up",

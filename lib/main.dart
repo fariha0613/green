@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'favourite_page.dart';
 import 'CartPage.dart';
@@ -10,7 +11,6 @@ import 'SignUp.dart' show SignupScreen;
 import 'WelcomeScreen.dart';
 import 'homepage.dart';
 import 'splashScreen.dart';
-//import 'package:firebase_auth/firebase_auth.dart';
 //...
 
 void main() async {
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: "/", // Start at splash screen
       routes: {
-        "/": (context) => splashScreen(),
+        "/": (context) => const CheckUser(),
         "welcome": (context) => WelcomeScreen(),
         "login": (context) => LoginScreen(),
         "signup": (context) => SignupScreen(),
@@ -43,8 +43,22 @@ class MyApp extends StatelessWidget {
         "cartPage": (context) => CartPage(),
         "account": (context) => ProfileScreen(),
         "favourite": (context) => FavouritePage(),
-
       },
     );
+  }
+}
+
+class CheckUser extends StatelessWidget {
+  const CheckUser({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      return homepage();
+    } else {
+      return splashScreen();
+    }
   }
 }
