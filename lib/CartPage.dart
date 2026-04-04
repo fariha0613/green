@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'cart_service.dart';
+import 'checkout_page.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -13,7 +14,7 @@ class CartPage extends StatefulWidget {
 class _CartPageState extends State<CartPage> {
   final CartService _cartService = CartService();
 
-  static const double deliveryFee = 10.0;
+  static const double deliveryFee = 70.0;
   static const double discount = 0.0;
 
   double _getSubtotal(List<QueryDocumentSnapshot<Map<String, dynamic>>> docs) {
@@ -307,7 +308,8 @@ class _CartPageState extends State<CartPage> {
                                                 ),
                                                 Container(
                                                   margin: const EdgeInsets.symmetric(
-                                                      horizontal: 12),
+                                                    horizontal: 12,
+                                                  ),
                                                   child: Text(
                                                     quantity
                                                         .toString()
@@ -468,6 +470,7 @@ class _CartPageState extends State<CartPage> {
           final total = docs.isEmpty
               ? 0.0
               : (subtotal + deliveryFee - discount).clamp(0.0, double.infinity);
+          final selectedCount = _selectedItemCount(docs);
 
           return Container(
             height: 130,
@@ -494,9 +497,19 @@ class _CartPageState extends State<CartPage> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Checkout logic not added yet."),
+                    if (selectedCount == 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Please select at least one item"),
+                        ),
+                      );
+                      return;
+                    }
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CheckoutPage(),
                       ),
                     );
                   },
