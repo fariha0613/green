@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:green/models/productModel.dart';
 import 'cart_service.dart';
+import 'checkout_page.dart';
 import 'favourite_service.dart';
 import 'hpCategory.dart';
 
@@ -41,27 +42,22 @@ class ItemPage extends StatelessWidget {
       }
     }
 
-    Future<void> addProductToCartOnly() async {
-      try {
-        final user = FirebaseAuth.instance.currentUser;
+    Future<void> openBuyNowCheckout() async {
+      final user = FirebaseAuth.instance.currentUser;
 
-        if (user == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Please login first")),
-          );
-          return;
-        }
-
-        await cartService.addToCart(product);
-
+      if (user == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("${product.name} added to cart")),
+          const SnackBar(content: Text("Please login first")),
         );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to add to cart: $e")),
-        );
+        return;
       }
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CheckoutPage(buyNowProduct: product),
+        ),
+      );
     }
 
     return Scaffold(
@@ -279,7 +275,7 @@ class ItemPage extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () async {
-                await addProductToCartOnly();
+                await openBuyNowCheckout();
               },
               child: Container(
                 height: 60,

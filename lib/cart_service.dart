@@ -22,6 +22,14 @@ class CartService {
     return _cartRef.orderBy('addedAt', descending: true).snapshots();
   }
 
+  Stream<QuerySnapshot<Map<String, dynamic>>> getSelectedCartStream() {
+    return _cartRef.where('selected', isEqualTo: true).snapshots();
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> getSelectedCartItemsOnce() {
+    return _cartRef.where('selected', isEqualTo: true).get();
+  }
+
   Future<void> addToCart(Product product) async {
     if (product.id == null || product.id!.isEmpty) {
       throw Exception("Product ID is missing");
