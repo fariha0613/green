@@ -58,8 +58,10 @@ class _SignupScreenState extends State<SignupScreen> {
       _isLoading = true;
     });
 
+    UserCredential? userCredential;
+
     try {
-      UserCredential userCredential =
+      userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -72,6 +74,8 @@ class _SignupScreenState extends State<SignupScreen> {
         'email': email,
         'uid': uid,
       });
+
+      if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Sign up successful")),
@@ -89,18 +93,32 @@ class _SignupScreenState extends State<SignupScreen> {
         message = "Invalid email address";
       }
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Something went wrong")),
-      );
-    }
+    } on FirebaseException catch (e) {
+      // Firestore write fail hole auth user delete kore dibe
+      if (userCredential != null && userCredential.user != null) {
+        await userCredential.user!.delete();
+      }
 
-    setState(() {
-      _isLoading = false;
-    });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Database error: ${e.message}")),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Something went wrong: $e")),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -115,7 +133,6 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -124,25 +141,20 @@ class _SignupScreenState extends State<SignupScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           children: [
             const SizedBox(height: 20),
-
             const Text(
               "Create Account",
               style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 8),
-
             const Text(
               "Join Green Cart today",
               style: TextStyle(color: Colors.black54),
             ),
-
             const SizedBox(height: 30),
 
             TextFormField(
@@ -155,6 +167,7 @@ class _SignupScreenState extends State<SignupScreen> {
             TextFormField(
               controller: _email,
               decoration: inputStyle("Email", Icons.email_outlined),
+              keyboardType: TextInputType.emailAddress,
             ),
 
             const SizedBox(height: 16),
