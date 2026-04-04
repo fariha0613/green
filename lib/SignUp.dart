@@ -98,7 +98,6 @@ class _SignupScreenState extends State<SignupScreen> {
         SnackBar(content: Text(message)),
       );
     } on FirebaseException catch (e) {
-      // Firestore write fail hole auth user delete kore dibe
       if (userCredential != null && userCredential.user != null) {
         await userCredential.user!.delete();
       }
@@ -133,6 +132,7 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -141,20 +141,25 @@ class _SignupScreenState extends State<SignupScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           children: [
             const SizedBox(height: 20),
+
             const Text(
               "Create Account",
               style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
             ),
+
             const SizedBox(height: 8),
+
             const Text(
               "Join Green Cart today",
               style: TextStyle(color: Colors.black54),
             ),
+
             const SizedBox(height: 30),
 
             TextFormField(
@@ -166,8 +171,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
             TextFormField(
               controller: _email,
-              decoration: inputStyle("Email", Icons.email_outlined),
               keyboardType: TextInputType.emailAddress,
+              decoration: inputStyle("Email", Icons.email_outlined),
             ),
 
             const SizedBox(height: 16),

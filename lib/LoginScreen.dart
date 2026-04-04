@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,7 +16,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _pass = TextEditingController();
   bool _hidePass = true;
 
-  // 🔥 FORGOT PASSWORD FUNCTION (simple + debug)
   Future<void> _forgotPassword() async {
     String email = _email.text.trim();
 
@@ -28,14 +29,10 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
 
-      print("Reset email sent to: $email");
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Reset link sent to email")),
       );
     } on FirebaseAuthException catch (e) {
-      print("Firebase error: ${e.code}");
-
       String message = "Error";
 
       if (e.code == 'user-not-found') {
@@ -47,8 +44,40 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    try {
+      if (kIsWeb) {
+        GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        await FirebaseAuth.instance.signInWithPopup(googleProvider);
+      } else {
+        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+        if (googleUser == null) {
+          return;
+        }
+
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        await FirebaseAuth.instance.signInWithCredential(credential);
+      }
+
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, "home");
     } catch (e) {
-      print("Other error: $e");
+      print("Google sign in error: $e");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Google sign in failed")),
+      );
     }
   }
 
@@ -129,9 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         .copyWith(
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _hidePass
-                              ? Icons.visibility
-                              : Icons.visibility_off,
+                          _hidePass ? Icons.visibility : Icons.visibility_off,
                           color: Colors.grey,
                         ),
                         onPressed: () {
@@ -143,7 +170,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  // 🔥 FORGOT PASSWORD BUTTON
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -157,7 +183,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 22),
 
-                  // SIGN IN BUTTON
                   SizedBox(
                     width: double.infinity,
                     height: 50,
@@ -175,23 +200,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (email.isEmpty || password.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text("Please enter email & password")),
+                              content: Text("Please enter email & password"),
+                            ),
                           );
                           return;
                         }
 
                         try {
-                          await FirebaseAuth.instance
-                              .signInWithEmailAndPassword(
+                          await FirebaseAuth.instance.signInWithEmailAndPassword(
                             email: email,
                             password: password,
                           );
 
-                          print(
-                              "LOGGED IN UID: ${FirebaseAuth.instance.currentUser?.uid}");
-
                           Navigator.pushReplacementNamed(context, "home");
-
                         } on FirebaseAuthException catch (e) {
                           String message = "Login failed";
 
@@ -229,7 +250,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      onPressed: () {},
+                      onPressed: _signInWithGoogle,
                       child: const Text(
                         "Continue with Google",
                         style: TextStyle(color: Colors.black87),
@@ -253,8 +274,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: const Text(
                     "Sign Up",
                     style: TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold),
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
