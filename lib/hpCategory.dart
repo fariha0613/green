@@ -17,14 +17,15 @@ class HpCategory extends StatelessWidget {
     }
 
     return GridView.builder(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 16),
+      physics: const BouncingScrollPhysics(),
+      itemCount: products.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.75,
+        childAspectRatio: 0.72,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),
-      itemCount: products.length,
       itemBuilder: (context, index) {
         final product = products[index];
 
@@ -38,12 +39,13 @@ class HpCategory extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(14),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
+                  color: Colors.grey.withOpacity(0.25),
                   spreadRadius: 1,
                   blurRadius: 5,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
@@ -54,33 +56,39 @@ class HpCategory extends StatelessWidget {
                   children: [
                     Expanded(
                       child: ClipRRect(
-                        borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(10)),
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(14),
+                        ),
                         child: Image.network(
                           product.imageUrl,
                           fit: BoxFit.cover,
                           width: double.infinity,
                           errorBuilder: (context, error, stackTrace) => Container(
                             color: Colors.green[100],
-                            child: const Icon(Icons.image_not_supported,
-                                color: Colors.grey),
+                            child: const Center(
+                              child: Icon(
+                                Icons.image_not_supported,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
                       child: Text(
                         product.name,
                         style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 14),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Padding(
-                      padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 10),
                       child: Text(
                         product.isDonate
                             ? "Free (Donate)"
@@ -94,12 +102,14 @@ class HpCategory extends StatelessWidget {
                     ),
                   ],
                 ),
-                // Favourite Button
+
                 Positioned(
-                  top: 5,
-                  right: 5,
-                  child:
-                  FavouriteButton(product: product, favService: favService),
+                  top: 8,
+                  right: 8,
+                  child: FavouriteButton(
+                    product: product,
+                    favService: favService,
+                  ),
                 ),
               ],
             ),
@@ -110,16 +120,18 @@ class HpCategory extends StatelessWidget {
   }
 }
 
-// ================= Shared Favourite Button =================
 class FavouriteButton extends StatefulWidget {
   final Product product;
   final FavouriteService favService;
 
-  const FavouriteButton(
-      {super.key, required this.product, required this.favService});
+  const FavouriteButton({
+    super.key,
+    required this.product,
+    required this.favService,
+  });
 
   @override
-  _FavouriteButtonState createState() => _FavouriteButtonState();
+  State<FavouriteButton> createState() => _FavouriteButtonState();
 }
 
 class _FavouriteButtonState extends State<FavouriteButton> {
@@ -138,7 +150,8 @@ class _FavouriteButtonState extends State<FavouriteButton> {
   }
 
   void toggleFavourite() async {
-    setState(() => isFav = !isFav); // instant UI feedback
+    setState(() => isFav = !isFav);
+
     if (isFav) {
       await widget.favService.addToFavourites({
         'name': widget.product.name,
