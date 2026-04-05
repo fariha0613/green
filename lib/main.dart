@@ -11,6 +11,8 @@ import 'SignUp.dart' show SignupScreen;
 import 'WelcomeScreen.dart';
 import 'homepage.dart';
 import 'splashScreen.dart';
+import 'BuyerOrdersPage.dart';
+import 'SellerOrdersPage.dart';
 //...
 
 void main() async {
@@ -43,6 +45,8 @@ class MyApp extends StatelessWidget {
         "cartPage": (context) => CartPage(),
         "account": (context) => ProfileScreen(),
         "favourite": (context) => FavouritePage(),
+        "buyerOrders": (context) => const BuyerOrdersPage(),
+        "sellerOrders": (context) => const SellerOrdersPage(),
       },
     );
   }

@@ -33,14 +33,32 @@ class OrderService {
 
     final int totalQuantity = items.fold<int>(
       0,
-          (sum, item) => sum + ((item['quantity'] ?? 0) as int),
+      (sum, item) => sum + ((item['quantity'] ?? 0) as int),
     );
 
     final batch = _firestore.batch();
 
+    final orderItems = items.map((item) {
+      return {
+        'productId': item['productId'] ?? '',
+        'name': item['name'] ?? '',
+        'sellerId': item['sellerId'] ?? '',
+        'quantity': item['quantity'] ?? 1,
+        'price': item['price'] ?? 0,
+        'itemTotal': item['itemTotal'] ?? 0,
+      };
+    }).toList();
+
+    final sellerIds = items
+        .map((item) => item['sellerId'] ?? '')
+        .where((id) => id.toString().isNotEmpty)
+        .toSet()
+        .toList();
+
     batch.set(orderRef, {
       'orderId': orderRef.id,
-      'userId': user.uid,
+      'buyerId': user.uid,
+      'buyerEmail': user.email ?? '',
       'fullName': fullName,
       'phoneNumber': phoneNumber,
       'fullAddress': fullAddress,
@@ -48,7 +66,8 @@ class OrderService {
       'landmark': landmark,
       'deliveryNote': deliveryNote,
       'paymentMethod': paymentMethod,
-      'items': items,
+      'items': orderItems,
+      'sellerIds': sellerIds,
       'itemCount': items.length,
       'totalQuantity': totalQuantity,
       'subtotal': subtotal,
