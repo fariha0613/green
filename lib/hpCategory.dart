@@ -158,6 +158,8 @@ class _FavouriteButtonState extends State<FavouriteButton> {
         'image': widget.product.imageUrl,
         'price': widget.product.price,
         'category': widget.product.category,
+        'description': widget.product.description,
+        'isDonate': widget.product.isDonate,
       }, widget.product.id!);
     } else {
       await widget.favService.removeFromFavourites(widget.product.id!);
