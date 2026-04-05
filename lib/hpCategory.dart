@@ -83,8 +83,6 @@ class HpCategory extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Padding(
@@ -120,6 +118,8 @@ class HpCategory extends StatelessWidget {
   }
 }
 
+
+//jawad part
 class FavouriteButton extends StatefulWidget {
   final Product product;
   final FavouriteService favService;

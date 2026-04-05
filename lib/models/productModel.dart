@@ -23,7 +23,7 @@ class Product {
     Timestamp? createdAt,
   }) : createdAt = createdAt ?? Timestamp.now();
 
-  // Convert Product object to Map for Firestore
+  // Convert product k firebase e nibo
   Map<String, dynamic> toMap() {
     return {
       'name': name.trim(),
@@ -37,7 +37,7 @@ class Product {
     };
   }
 
-  // Create Product object from Firestore document snapshot
+  // product obj back korbo firebase theke
   factory Product.fromDocument(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Product(
@@ -58,7 +58,7 @@ class ProductService {
   final CollectionReference _productCollection =
       FirebaseFirestore.instance.collection('products');
 
-  // Add a new product
+  // new product add firebase
   Future<void> addProduct(Product product) async {
     await _productCollection.add(product.toMap());
   }
