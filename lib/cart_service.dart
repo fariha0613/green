@@ -55,6 +55,7 @@ class CartService {
           'category': product.category,
           'description': product.description,
           'isDonate': product.isDonate,
+          'sellerId': product.sellerId,
           'quantity': 1,
           'selected': true,
           'addedAt': FieldValue.serverTimestamp(),

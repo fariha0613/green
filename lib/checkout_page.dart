@@ -16,12 +16,10 @@ class CheckoutPage extends StatefulWidget {
 class _CheckoutPageState extends State<CheckoutPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // ✅ Customer Info
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
 
-  // ✅ Delivery Info (UPDATED)
   final TextEditingController _countryController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _houseController = TextEditingController();
@@ -40,11 +38,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   bool get _isBuyNowMode => widget.buyNowProduct != null;
 
-  // ---------------- BUILD ITEMS ----------------
-
   List<Map<String, dynamic>> _buildCartItemsFromDocs(
-      List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
-      ) {
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
+  ) {
     return docs.map((doc) {
       final data = doc.data();
       final bool isDonate = data['isDonate'] ?? false;
@@ -60,6 +56,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         'category': data['category'] ?? '',
         'description': data['description'] ?? '',
         'isDonate': isDonate,
+        'sellerId': data['sellerId'] ?? '',
         'quantity': quantity,
         'itemTotal': price * quantity,
       };
@@ -79,6 +76,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         'category': product.category,
         'description': product.description,
         'isDonate': product.isDonate,
+        'sellerId': product.sellerId,
         'quantity': 1,
         'itemTotal': price,
       }
@@ -93,8 +91,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
     return subtotal;
   }
 
-  // ---------------- PLACE ORDER ----------------
-
   Future<void> _placeOrder({
     required List<Map<String, dynamic>> items,
     List<DocumentReference<Map<String, dynamic>>> cartRefsToDelete = const [],
@@ -105,18 +101,16 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     try {
       final subtotal = _getSubtotalFromItems(items);
-      final total = (subtotal + deliveryFee - discount).clamp(0.0, double.infinity);
+      final total =
+          (subtotal + deliveryFee - discount).clamp(0.0, double.infinity);
 
       await _orderService.placeOrder(
         fullName: _fullNameController.text.trim(),
         phoneNumber: _phoneController.text.trim(),
         fullAddress: _addressController.text.trim(),
-
-        // ✅ UPDATED FIELDS
-        cityArea: _zipController.text.trim(), // using zip as location
+        cityArea: _zipController.text.trim(),
         landmark: _landmarkController.text.trim(),
         deliveryNote: _noteController.text.trim(),
-
         paymentMethod: _paymentMethod,
         items: items,
         subtotal: subtotal,
@@ -153,8 +147,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
   }
 
-  // ---------------- UI HELPERS ----------------
-
   Widget _field(String label, TextEditingController c,
       {bool requiredField = true}) {
     return Padding(
@@ -186,16 +178,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  // ---------------- MAIN BUILD ----------------
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Checkout"), backgroundColor: Colors.green),
+      appBar: AppBar(
+        title: const Text("Checkout"),
+        backgroundColor: Colors.green,
+      ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: _isBuyNowMode
-            ? null
-            : _cartService.getSelectedCartStream(),
+        stream: _isBuyNowMode ? null : _cartService.getSelectedCartStream(),
         builder: (context, snapshot) {
           List<Map<String, dynamic>> items = [];
           List<DocumentReference<Map<String, dynamic>>> refs = [];
@@ -210,7 +201,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
           final subtotal = _getSubtotalFromItems(items);
           final total =
-          (subtotal + deliveryFee - discount).clamp(0.0, double.infinity);
+              (subtotal + deliveryFee - discount).clamp(0.0, double.infinity);
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -219,10 +210,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-                  // ---------------- CUSTOMER ----------------
-                  const Text("Customer Info",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Customer Info",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 10),
 
                   _field("Full Name", _fullNameController),
@@ -231,45 +222,57 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
                   const SizedBox(height: 15),
 
-                  // ---------------- DELIVERY ----------------
-                  const Text("Delivery Info",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Delivery Info",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 10),
 
                   _field("Country", _countryController),
                   _field("Full Address", _addressController),
                   _field("House / Flat No.", _houseController),
                   _field("Zip Code / Postal Code", _zipController),
-                  _field("Nearby Landmark (Optional)", _landmarkController,
-                      requiredField: false),
-                  _field("Delivery Note (Optional)", _noteController,
-                      requiredField: false),
+                  _field(
+                    "Nearby Landmark (Optional)",
+                    _landmarkController,
+                    requiredField: false,
+                  ),
+                  _field(
+                    "Delivery Note (Optional)",
+                    _noteController,
+                    requiredField: false,
+                  ),
 
                   const SizedBox(height: 20),
 
-                  // ---------------- SUMMARY ----------------
-                  const Text("Order Summary",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Order Summary",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 10),
 
                   _summaryRow("Subtotal", "\$${subtotal.toStringAsFixed(2)}"),
                   const Divider(),
                   _summaryRow("Delivery Fee", "\$70"),
                   const Divider(),
-                  _summaryRow("Final Total",
-                      "\$${total.toStringAsFixed(2)}",
-                      bold: true),
+                  _summaryRow(
+                    "Final Total",
+                    "\$${total.toStringAsFixed(2)}",
+                    bold: true,
+                  ),
 
                   const SizedBox(height: 20),
 
-                  // ---------------- BUTTON ----------------
                   SizedBox(
                     width: double.infinity,
                     height: 55,
                     child: ElevatedButton(
                       onPressed: _isPlacingOrder
                           ? null
-                          : () => _placeOrder(items: items, cartRefsToDelete: refs),
+                          : () => _placeOrder(
+                                items: items,
+                                cartRefsToDelete: refs,
+                              ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                       ),
