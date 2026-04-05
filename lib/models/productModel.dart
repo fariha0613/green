@@ -8,6 +8,7 @@ class Product {
   double price;
   bool isDonate;
   String imageUrl;
+  String sellerId;
   Timestamp createdAt;
 
   Product({
@@ -18,6 +19,7 @@ class Product {
     required this.price,
     required this.isDonate,
     required this.imageUrl,
+    this.sellerId = '',
     Timestamp? createdAt,
   }) : createdAt = createdAt ?? Timestamp.now();
 
@@ -30,6 +32,7 @@ class Product {
       'price': price,
       'isDonate': isDonate,
       'imageUrl': imageUrl,
+      'sellerId': sellerId,
       'createdAt': FieldValue.serverTimestamp(),
     };
   }
@@ -45,6 +48,7 @@ class Product {
       price: (data['price'] ?? 0).toDouble(),
       isDonate: data['isDonate'] ?? false,
       imageUrl: data['imageUrl'] ?? '',
+      sellerId: data['sellerId'] ?? '',
       createdAt: data['createdAt'] ?? Timestamp.now(),
     );
   }
@@ -52,7 +56,7 @@ class Product {
 
 class ProductService {
   final CollectionReference _productCollection =
-  FirebaseFirestore.instance.collection('products');
+      FirebaseFirestore.instance.collection('products');
 
   // Add a new product
   Future<void> addProduct(Product product) async {
@@ -60,12 +64,11 @@ class ProductService {
   }
 
   // Fetch all products as a stream
-
   Stream<List<Product>> getProducts() {
     return _productCollection
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) =>
-        snapshot.docs.map((doc) => Product.fromDocument(doc)).toList());
+            snapshot.docs.map((doc) => Product.fromDocument(doc)).toList());
   }
 }

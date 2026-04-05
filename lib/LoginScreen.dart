@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-//hello,,
-
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginScreen extends StatefulWidget {
-
   const LoginScreen({super.key});
 
   @override
@@ -16,6 +15,71 @@ class _LoginScreenState extends State<LoginScreen> {
   final _email = TextEditingController();
   final _pass = TextEditingController();
   bool _hidePass = true;
+
+  Future<void> _forgotPassword() async {
+    String email = _email.text.trim();
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Enter your email first")),
+      );
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Reset link sent to email")),
+      );
+    } on FirebaseAuthException catch (e) {
+      String message = "Error";
+
+      if (e.code == 'user-not-found') {
+        message = "No user found";
+      } else if (e.code == 'invalid-email') {
+        message = "Invalid email";
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    try {
+      if (kIsWeb) {
+        GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        await FirebaseAuth.instance.signInWithPopup(googleProvider);
+      } else {
+        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+        if (googleUser == null) {
+          return;
+        }
+
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        await FirebaseAuth.instance.signInWithCredential(credential);
+      }
+
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, "home");
+    } catch (e) {
+      print("Google sign in error: $e");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Google sign in failed")),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -94,9 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         .copyWith(
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _hidePass
-                              ? Icons.visibility
-                              : Icons.visibility_off,
+                          _hidePass ? Icons.visibility : Icons.visibility_off,
                           color: Colors.grey,
                         ),
                         onPressed: () {
@@ -108,9 +170,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _forgotPassword,
+                      child: const Text(
+                        "Forgot Password?",
+                        style: TextStyle(color: Colors.green),
+                      ),
+                    ),
+                  ),
+
                   const SizedBox(height: 22),
 
-                  // ✅ FIXED SIGN IN BUTTON
                   SizedBox(
                     width: double.infinity,
                     height: 50,
@@ -121,9 +193,39 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,"home");
+                      onPressed: () async {
+                        String email = _email.text.trim();
+                        String password = _pass.text.trim();
+
+                        if (email.isEmpty || password.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Please enter email & password"),
+                            ),
+                          );
+                          return;
+                        }
+
+                        try {
+                          await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            email: email,
+                            password: password,
+                          );
+
+                          Navigator.pushReplacementNamed(context, "home");
+                        } on FirebaseAuthException catch (e) {
+                          String message = "Login failed";
+
+                          if (e.code == 'user-not-found') {
+                            message = "No user found";
+                          } else if (e.code == 'wrong-password') {
+                            message = "Wrong password";
+                          }
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(message)),
+                          );
+                        }
                       },
                       child: const Text(
                         "Sign In",
@@ -148,11 +250,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      onPressed: () {
-
-
-
-                      },
+                      onPressed: _signInWithGoogle,
                       child: const Text(
                         "Continue with Google",
                         style: TextStyle(color: Colors.black87),
@@ -171,14 +269,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 const Text("Don’t have an account? "),
                 GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(
-                        context,"signup");
+                    Navigator.pushNamed(context, "signup");
                   },
                   child: const Text(
                     "Sign Up",
                     style: TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold),
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],

@@ -72,7 +72,7 @@ class homepage extends StatelessWidget {
               indicatorColor: Colors.green,
               tabs: [
                 Tab(text: "Furniture"),
-                Tab(text: "Clothes"),
+                Tab(text: "Cloths"),
                 Tab(text: "Electronics"),
                 Tab(text: "Others"),
               ],
@@ -91,7 +91,7 @@ class homepage extends StatelessWidget {
 
                   final allProducts = snapshot.data!;
 
-                  final categories = ["Furniture", "Clothes", "Electronics", "Others"];
+                  final categories = ["Furniture", "Cloths", "Electronics", "Others"];
 
                   return TabBarView(
                     children: categories.map((cat) {

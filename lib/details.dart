@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'homepage.dart';
 
 class DetailsPage extends StatefulWidget {
@@ -25,9 +26,7 @@ class _DetailsPageState extends State<DetailsPage> {
   String? selectedCategory;
   String? uploadedImageUrl;
 
-  // 🔐 Cloudinary credentials
   final String cloudinaryApiKey = '274289191242395';
-  final String cloudinaryApiSecret = 'ZAMJ4H7XtUkW83D0AGU5mb9lgtU';
   final String cloudinaryCloudName = 'daftglzki';
   final String cloudinaryUploadPreset = 'Green123';
 
@@ -67,18 +66,15 @@ class _DetailsPageState extends State<DetailsPage> {
         ));
       }
 
-      final response = await request.send().timeout(Duration(seconds: 30));
+      final response = await request.send();
       final responseData = await response.stream.bytesToString();
       final jsonData = json.decode(responseData);
 
       if (response.statusCode == 200) {
-        return jsonData['secure_url'] as String?;
-      } else {
-        print('Cloudinary upload error: $jsonData');
-        return null;
+        return jsonData['secure_url'];
       }
+      return null;
     } catch (e) {
-      print('Error uploading to Cloudinary: $e');
       return null;
     }
   }
@@ -86,30 +82,32 @@ class _DetailsPageState extends State<DetailsPage> {
   Future<bool> uploadData() async {
     if (nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please enter a product name")),
+        SnackBar(content: Text("Enter product name")),
       );
       return false;
     }
 
     if (selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please select a category")),
+        SnackBar(content: Text("Select category")),
+      );
+      return false;
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Login first")),
       );
       return false;
     }
 
     String? imageUrl;
+
     if (_pickedFile != null) {
       setState(() => isImageUploading = true);
       imageUrl = await uploadImageToCloudinary(_pickedFile!);
       setState(() => isImageUploading = false);
-
-      if (imageUrl == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Image upload failed. Please try again.")),
-        );
-        return false;
-      }
     }
 
     try {
@@ -120,16 +118,15 @@ class _DetailsPageState extends State<DetailsPage> {
         'price': isDonate ? 0 : int.tryParse(priceController.text) ?? 0,
         'isDonate': isDonate,
         'imageUrl': imageUrl ?? '',
+        'sellerId': user.uid, // 🔥 IMPORTANT
         'createdAt': FieldValue.serverTimestamp(),
-      }).timeout(Duration(seconds: 10));
+      });
 
       return true;
     } catch (e) {
-      print('Firestore upload error: $e');
       return false;
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -137,158 +134,94 @@ class _DetailsPageState extends State<DetailsPage> {
       appBar: AppBar(
         backgroundColor: Colors.green,
         title: Text("Product Details", style: TextStyle(color: Colors.white)),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
         actions: [
           isLoading || isImageUploading
               ? Padding(
-            padding: EdgeInsets.all(12),
-            child: CircularProgressIndicator(color: Colors.white),
-          )
+                  padding: EdgeInsets.all(12),
+                  child: CircularProgressIndicator(color: Colors.white),
+                )
               : TextButton(
-            onPressed: () async {
-              setState(() => isLoading = true);
-              final success = await uploadData();
-              setState(() => isLoading = false);
+                  onPressed: () async {
+                    setState(() => isLoading = true);
+                    final ok = await uploadData();
+                    setState(() => isLoading = false);
 
-              if (success && mounted) {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (_) => homepage()),
-                      (route) => false,
-                );
-              }
-            },
-            child: Text("Confirm",
-                style: TextStyle(color: Colors.white, fontSize: 16)),
-          ),
+                    if (ok && mounted) {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (_) => homepage()),
+                        (route) => false,
+                      );
+                    }
+                  },
+                  child: Text("Confirm",
+                      style: TextStyle(color: Colors.white)),
+                )
         ],
       ),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image Upload
             GestureDetector(
-              onTap: isImageUploading ? null : pickImage,
+              onTap: pickImage,
               child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                padding: EdgeInsets.all(15),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.image, color: Colors.grey),
+                    Icon(Icons.image),
                     SizedBox(width: 10),
-                    Text(
-                      _pickedFile != null ? _pickedFile!.name : "Select Image",
-                      style: TextStyle(color: Colors.grey[700], fontSize: 16),
-                    ),
+                    Text(_pickedFile?.name ?? "Select Image"),
                   ],
                 ),
               ),
             ),
 
-
-            if (_pickedFile != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: TextButton.icon(
-                  onPressed: () => setState(() => _pickedFile = null),
-                  icon: Icon(Icons.delete, color: Colors.red),
-                  label: Text("Remove image", style: TextStyle(color: Colors.red)),
-                ),
-              ),
-
             SizedBox(height: 20),
 
-            // Category Dropdown
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: DropdownButton<String>(
-                value: selectedCategory,
-                hint: Text("Select Category",
-                    style: TextStyle(color: Colors.black)),
-                isExpanded: true,
-                underline: SizedBox(),
-                items: ["Clothes", "Electronics", "Furniture", "Others"]
-                    .map((category) => DropdownMenuItem<String>(
-                  value: category,
-                  child: Text(category),
-                ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() => selectedCategory = value);
-                },
-              ),
+            DropdownButton<String>(
+              value: selectedCategory,
+              hint: Text("Select Category"),
+              isExpanded: true,
+              items: ["Clothes", "Electronics", "Furniture", "Others"]
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .toList(),
+              onChanged: (v) => setState(() => selectedCategory = v),
             ),
 
             SizedBox(height: 20),
 
-            // Product Name
             TextField(
               controller: nameController,
-              decoration: InputDecoration(
-                labelText: "Product Name",
-                border: OutlineInputBorder(),
-              ),
+              decoration: InputDecoration(labelText: "Name"),
             ),
 
             SizedBox(height: 20),
 
-            // Description
             TextField(
               controller: descriptionController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                labelText: "Description",
-                border: OutlineInputBorder(),
-              ),
+              decoration: InputDecoration(labelText: "Description"),
             ),
 
             SizedBox(height: 20),
 
-            // Price
             TextField(
               controller: priceController,
-              keyboardType: TextInputType.number,
-              enabled: !isDonate,
-              decoration: InputDecoration(
-                labelText: "Price",
-                border: OutlineInputBorder(),
-              ),
+              decoration: InputDecoration(labelText: "Price"),
             ),
 
-            SizedBox(height: 15),
-
-            // Donate Toggle
             Row(
               children: [
                 Checkbox(
                   value: isDonate,
-                  onChanged: (value) {
-                    setState(() {
-                      isDonate = value!;
-                      if (isDonate) {
-                        priceController.text = "0";
-                      } else {
-                        priceController.clear();
-                      }
-                    });
-                  },
+                  onChanged: (v) => setState(() => isDonate = v!),
                 ),
-                Text("Donate (Price will be 0)")
+                Text("Donate")
               ],
-            ),
+            )
           ],
         ),
       ),
